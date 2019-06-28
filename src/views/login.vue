@@ -42,7 +42,7 @@ export default {
             min: 5,
             max: 12,
             message: "用户名长度在 5 到 12 个字符",
-            trigger: "blur"
+            trigger: "change"
           }
         ],
         password: [
@@ -55,7 +55,7 @@ export default {
             min: 6,
             max: 18,
             message: "密码长度必须在 6 到 18 个字符之间",
-            trigger: "blur"
+            trigger: "change"
           }
         ]
       }
