@@ -19,7 +19,7 @@
 
         <el-form-item>
           <el-button type="primary" @click="submitForm('form')">登录</el-button>
-          <el-button>重置</el-button>
+          <el-button @click="resetForm('form')">重置</el-button>
         </el-form-item>
       </el-form>
     </el-col>
@@ -53,8 +53,8 @@ export default {
           },
           {
             min: 6,
-            max: 15,
-            massage: "密码长度在 6 到 15 个字符之间",
+            max: 18,
+            message: "密码长度必须在 6 到 18 个字符之间",
             trigger: "blur"
           }
         ]
@@ -73,13 +73,22 @@ export default {
             if (meta.status == 200) {
               localStorage.setItem("token", data.token);
 
+              this.$message({
+                message: "恭喜你,登录成功了",
+                type: "success"
+              });
+
               this.$router.push("/home");
             }
           });
         } else {
+          
           return false;
         }
       });
+    },
+    resetForm(form) {
+      this.$refs[form].resetFields();
     }
   }
 };
