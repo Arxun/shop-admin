@@ -76,9 +76,7 @@ export default {
   line-height: 50px;
   font-size: 16px;
 }
-/* .main .users .addUser {
-    margin-top: 15px;
-} */
+
 </style>
 
 
