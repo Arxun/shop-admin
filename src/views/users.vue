@@ -41,11 +41,17 @@
       </el-table-column>
       <el-table-column prop="address" label="操作">
         <template v-slot="{row}">
-          <el-button type="primary" plain size="mini" icon="el-icon-edit"></el-button>
+          <el-button
+            type="primary"
+            plain
+            size="mini"
+            icon="el-icon-edit"
+            @click="openEditUserDialog(row.id)"
+          ></el-button>
 
           <el-button type="danger" plain size="mini" icon="el-icon-delete" @click="delUser(row.id)"></el-button>
 
-          <el-button type="success" plain size="mini" icon="el-icon-check">添加用户</el-button>
+          <el-button type="success" plain size="mini" icon="el-icon-check">分配角色</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -58,8 +64,8 @@
       @current-change="onPageChange"
     ></el-pagination>
 
-    <el-dialog title="添加用户" :visible.sync="dialogAddUser">
-      <el-form label-width="100px" :model="addUserData" :rules="rules" ref="ruleForm">
+    <el-dialog title="添加用户" :visible.sync="dialogAddUser" @close="$refs.addruleForm.resetFields();">
+      <el-form label-width="100px" :model="addUserData" :rules="rules" ref="addruleForm">
         <el-form-item label="用户名" prop="username">
           <el-input autocomplete="off" v-model="addUserData.username"></el-input>
         </el-form-item>
@@ -76,6 +82,25 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogAddUser = false">取 消</el-button>
         <el-button type="primary" @click="addUser">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="编辑用户" :visible.sync="dialogEditUser">
+      <el-form label-width="100px" :model="editUserData" :rules="editrules" ref="editruleForm">
+        <el-form-item label="用户名">
+          <el-tag type="info" v-text="editUserData.username"></el-tag>
+        </el-form-item>
+
+        <el-form-item label="邮箱" prop="email">
+          <el-input autocomplete="off" v-model="editUserData.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机" prop="mobile">
+          <el-input autocomplete="off" v-model="editUserData.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogeditUser = false">取 消</el-button>
+        <el-button type="primary" @click="editUser">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -120,7 +145,31 @@ export default {
         email: [
           {
             pattern: /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/,
-            message: "请输入密码",
+            message: "邮箱格式不正确",
+            trigger: "change"
+          }
+        ],
+        mobile: [
+          {
+            pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/,
+            message: "手机号码格式不正确",
+            trigger: "change"
+          }
+        ]
+      },
+
+      dialogEditUser: false,
+      editUserData: {
+        id: 0,
+        username: "",
+        email: "",
+        mobile: ""
+      },
+      editrules: {
+        email: [
+          {
+            pattern: /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/,
+            message: "请输入邮箱",
             trigger: "change"
           }
         ],
@@ -216,7 +265,7 @@ export default {
     },
     async addUser() {
       try {
-        await this.$refs.ruleForm.validate();
+        await this.$refs.addruleForm.validate();
         //表单校验成功之后发的ajax
         let res = await this.$http({
           url: "/users",
@@ -235,6 +284,44 @@ export default {
           this.$message({
             message: res.data.meta.msg,
             type: "error",
+            duration: 1000
+          });
+        }
+      } catch (e) {}
+    },
+    async openEditUserDialog(id) {
+      this.dialogEditUser = true;
+      let res = await this.$http({
+        url: `users/${id}`
+      });
+
+      this.editUserData = res.data.data;
+    },
+    async editUser() {
+      try {
+        await this.$refs.editruleForm.validate();
+        let res = await this.$http({
+          url: `/users/${this.editUserData.id}`,
+          method: "put",
+          data: {
+            mobile: this.editUserData.mobile,
+            email: this.editUserData.email
+          }
+        });
+
+        if (res.data.meta.status === 200) {
+          this.$message({
+            type: "success",
+            message: res.data.meta.msg,
+            duration: 1000
+          });
+          this.getUserList();
+
+          this.dialogEditUser = false
+        }else{
+          this.$message({
+            type: "error",
+            message: res.data.meta.msg,
             duration: 1000
           });
         }
