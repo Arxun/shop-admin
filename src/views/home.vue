@@ -67,7 +67,7 @@ export default {
       }
     }).then(({ data: { data, meta } }) => {
       if (meta.status === 200) {
-        console.log(data);
+        // console.log(data);
         this.menus = data;
       }
     });
