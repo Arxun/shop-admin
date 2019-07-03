@@ -51,7 +51,13 @@
 
           <el-button type="danger" plain size="mini" icon="el-icon-delete" @click="delUser(row.id)"></el-button>
 
-          <el-button type="success" plain size="mini" icon="el-icon-check">分配角色</el-button>
+          <el-button
+            type="success"
+            plain
+            size="mini"
+            icon="el-icon-check"
+            @click="openRoleDialog(row)"
+          >分配角色</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -101,6 +107,29 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogeditUser = false">取 消</el-button>
         <el-button type="primary" @click="editUser">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="分配角色" :visible.sync="RoledialogShow">
+      <el-form label-width="100px" :model="assionRoleData">
+        <el-form-item label="用户名">
+          <el-tag type="info" v-text="assionRoleData.username"></el-tag>
+        </el-form-item>
+
+        <el-form-item>
+          <el-select v-model="assionRoleData.rid" placeholder="请选择">
+            <el-option
+              v-for="item in roleList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="RoledialogShow = false">取 消</el-button>
+        <el-button type="primary" @click="assionRole">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -180,7 +209,13 @@ export default {
             trigger: "change"
           }
         ]
-      }
+      },
+      RoledialogShow: false,
+      assionRoleData: {
+        username: "",
+        rid: ""
+      },
+      roleList: []
     };
   },
   created() {
@@ -317,8 +352,8 @@ export default {
           });
           this.getUserList();
 
-          this.dialogEditUser = false
-        }else{
+          this.dialogEditUser = false;
+        } else {
           this.$message({
             type: "error",
             message: res.data.meta.msg,
@@ -326,12 +361,44 @@ export default {
           });
         }
       } catch (e) {}
+    },
+    async openRoleDialog(row) {
+      this.RoledialogShow = true;
+      let res = await this.$http({
+        url: `/users/${row.id}`
+      });
+
+      if (res.data.meta.status == 200) {
+        console.log(res);
+        this.assionRoleData = res.data.data;
+      }
+      let res2 = await this.$http({
+        url: `roles`
+      });
+
+      this.roleList = res2.data.data;
+    },
+    async assionRole() {
+      let res = await this.$http({
+        url: `users/${this.assionRoleData.id}/role`,
+        method: "put",
+        data: {
+          rid: this.assionRoleData.rid
+        }
+      });
+
+      this.$message({
+        type: "success",
+        message: res.data.meta.msg,
+        duration: 1000
+      });
+      this.RoledialogShow = false;
     }
   }
 };
 </script>
 
-<style>
+<style scoped>
 .el-main .el-breadcrumb {
   background-color: #d4dae0;
   padding-left: 10px;

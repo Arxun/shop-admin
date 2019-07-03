@@ -10,13 +10,13 @@
         <template v-slot="{row}">
           <el-row type="flex" class="item1" v-for="item1 in row.children" :key="item1.id">
             <el-col :span="4">
-              <el-tag closable>{{item1.authName}}</el-tag>
+              <el-tag closable @close="delRight(row,item1.id)">{{item1.authName}}</el-tag>
               <span class="el-icon-arrow-right"></span>
             </el-col>
             <el-col>
               <el-row type="flex" class="item2" v-for="item2 in item1.children" :key="item2.id">
                 <el-col :span="6">
-                  <el-tag type="success" closable>{{item2.authName}}</el-tag>
+                  <el-tag type="success" closable @close="delRight(row,item2.id)">{{item2.authName}}</el-tag>
                   <span class="el-icon-arrow-right"></span>
                 </el-col>
                 <el-col>
@@ -26,6 +26,7 @@
                     v-for="item3 in item2.children"
                     :key="item3.id"
                     closable
+                    @close="delRight(row,item3.id)"
                   >{{item3.authName}}</el-tag>
                 </el-col>
               </el-row>
@@ -109,20 +110,17 @@ export default {
 
       //需要让tree组件中默认选中当前角色拥有的权限信息
       //把row中所有的权限的id组成一个数组
-      let arr1 = [];
-      let arr2 = [];
+
       let arr3 = [];
 
       row.children.forEach(item1 => {
-        arr1.push(item1.id);
         item1.children.forEach(item2 => {
-          arr2.push(item2.id);
           item2.children.forEach(item3 => {
-            arr3.push(item2.id);
+            arr3.push(item3.id);
           });
         });
       });
-      this.checkedRights = [...arr1, ...arr2, ...arr3];
+      this.checkedRights = [...arr3];
     },
     async updateRoleRights() {
       let ids = [
@@ -146,6 +144,20 @@ export default {
       this.getRoleList();
 
       this.rightsdialogisshow = false;
+    },
+    //低配版本
+    async delRight(row, id) {
+      const res = await this.$http({
+        url: `/roles/${row.id}/rights/${id}`,
+        method: "delete"
+      });
+      this.$message({
+        type: "success",
+        message: res.data.meta.msg,
+        duration: 1000
+      });
+
+      this.getRoleList();
     }
 
     // getIndex(index) {
