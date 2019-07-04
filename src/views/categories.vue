@@ -5,7 +5,7 @@
       <el-breadcrumb-item>商品管理</el-breadcrumb-item>
       <el-breadcrumb-item>商品分类</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-button type="success" plain>添加分类</el-button>
+    <el-button type="success" plain @click="openAddCateDialog">添加分类</el-button>
     <el-table :data="categoriesList" stripe style="width: 100%">
       <!-- 此处不会，明天在看视频，弄清楚内部的属性 -->
 
@@ -44,6 +44,26 @@
       :current-page="pagenum"
       @current-change="pageChange"
     ></el-pagination>
+
+    <el-dialog title="添加分类" :visible.sync="addCateShow">
+      <el-form label-width="100px" :model="addCateFormDate">
+        <el-form-item label="分类名称">
+          <el-input v-model="addCateFormDate.cat_name" autocomplete="off"></el-input>
+        </el-form-item>
+
+        <el-form-item>
+          <el-cascader
+            v-model="addCateFormDate.pidArr"
+            :options="cateOptions"
+            :props="defaultProps"
+          ></el-cascader>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addCateShow = false">取 消</el-button>
+        <el-button type="primary" @click="addCate">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -57,16 +77,67 @@ export default {
       categoriesList: [],
       pagenum: 1,
       pagesize: 5,
-      total: 0
+      total: 0,
+      addCateShow: false,
+      addCateFormDate: {
+        cat_name: "",
+        pidArr: []
+      },
+      cateOptions: [],
+      defaultProps: {
+        value: "cat_id",
+        label: "cat_name",
+        checkStrictly: true
+      }
     };
   },
   created() {
     this.getCategoriesList();
   },
   methods: {
-    pageChange(currentPage){
-      this.pagenum = currentPage
-      this.getCategoriesList()
+    async addCate() {
+      let cat_name = this.addCateFormDate.cat_name;
+      let cat_id =
+        this.addCateFormDate.pidArr[this.addCateFormDate.pidArr.length - 1] ||
+        0;
+      let cat_level = this.addCateFormDate.length;
+
+      let res = await this.$http({
+        url: "categories",
+        methos: "post",
+        data: {
+          cat_name,
+          cat_id,
+          cat_level
+        }
+      });
+      if (res.data.meta.status == 201) {
+        this.$message({
+          type: "success",
+          message: res.data.meta.msg,
+          duration: 1000
+        });
+        this.addCateShow = false;
+        this.getCategoriesList();
+      }
+    },
+    async openAddCateDialog() {
+      let res = await this.$http({
+        url: "categories",
+        // 此时级联菜单里可能会手动添加三级分类名，所以只需要请求来前两级就行
+        params: {
+          type: 2
+        }
+      });
+
+      console.log(res);
+      this.cateOptions = res.data.data;
+      this.addCateShow = true;
+    },
+
+    pageChange(currentPage) {
+      this.pagenum = currentPage;
+      this.getCategoriesList();
     },
     async getCategoriesList() {
       let res = await this.$http({

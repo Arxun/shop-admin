@@ -6,7 +6,7 @@
       <el-breadcrumb-item>商品列表</el-breadcrumb-item>
     </el-breadcrumb>
 
-    <el-button type="success" plain>添加商品</el-button>
+    <el-button type="success" plain @click="addGoods">添加商品</el-button>
     <el-table ref="singleTable" :data="goodsList" highlight-current-row style="width: 100%">
       <el-table-column type="index" width="50"></el-table-column>
       <el-table-column property="goods_name" label="商品名称" width="120"></el-table-column>
@@ -43,6 +43,9 @@ export default {
     this.getGoodsList();
   },
   methods: {
+    addGoods() {
+      this.$router.push("/goods-add");
+    },
     async getGoodsList() {
       let res = await this.$http({
         url: "goods",

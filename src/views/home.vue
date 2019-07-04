@@ -128,6 +128,9 @@ export default {
 .home-aside {
   background-color: #545c64;
 }
+.el-main{
+  background-color: #eee;
+}
 </style>
 
 
