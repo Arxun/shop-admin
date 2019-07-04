@@ -3,7 +3,7 @@
     <el-header class="home-header">
       <el-row type="flex" align="middle">
         <el-col :span="6">
-          <img src="../assets/itlogo.png" alt>
+          <img src="../assets/itlogo.png" alt />
         </el-col>
         <el-col>
           <h1>电商后台管理系统</h1>
@@ -22,8 +22,6 @@
         <el-menu
           :default-active="$route.path"
           class="el-menu-vertical-demo"
-          @open="handleOpen"
-          @close="handleClose"
           background-color="#545c64"
           text-color="#fff"
           active-text-color="#ffd04b"
@@ -93,12 +91,6 @@ export default {
             message: "退出取消了"
           });
         });
-    },
-    handleOpen(key, keyPath) {
-      console.log(key, keyPath);
-    },
-    handleClose(key, keyPath) {
-      console.log(key, keyPath);
     }
   }
 };
