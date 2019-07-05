@@ -5,7 +5,7 @@
       <el-breadcrumb-item>管理权限</el-breadcrumb-item>
       <el-breadcrumb-item>角色列表</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-table :data="roleList" stripe style="width: 100%">
+    <el-table ref="roleTable" :data="roleList" stripe style="width: 100%">
       <el-table-column type="expand">
         <template v-slot="{row}">
           <el-row type="flex" class="item1" v-for="item1 in row.children" :key="item1.id">
@@ -92,12 +92,13 @@ export default {
     this.getRoleList();
   },
   methods: {
-    async getRoleList() {
+    async getRoleList(t = () => {}) {
       let res = await this.$http({
         url: "roles"
       });
       //   console.log(res);
       this.roleList = res.data.data;
+      t();
     },
     async openrightsdialogisshow(row) {
       this.currentEditRoleId = row.id;
@@ -157,7 +158,14 @@ export default {
         duration: 1000
       });
 
-      this.getRoleList();
+      this.getRoleList(() => {
+        this.$nextTick(() => {
+          this.$refs.roleTable.toggleRowExpansion(
+            this.roleList.find(v => v.id == row.id),
+            true
+          );
+        });
+      });
     }
 
     // getIndex(index) {
