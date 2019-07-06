@@ -46,12 +46,12 @@
     ></el-pagination>
 
     <el-dialog title="添加分类" :visible.sync="addCateShow">
-      <el-form label-width="100px" :model="addCateFormDate">
-        <el-form-item label="分类名称">
+      <el-form label-width="100px" :model="addCateFormDate" ref="addCateForm">
+        <el-form-item label="分类名称" prop="cat_name">
           <el-input v-model="addCateFormDate.cat_name" autocomplete="off"></el-input>
         </el-form-item>
 
-        <el-form-item>
+        <el-form-item prop="pidArr">
           <el-cascader
             v-model="addCateFormDate.pidArr"
             :options="cateOptions"
@@ -97,20 +97,22 @@ export default {
   methods: {
     async addCate() {
       let cat_name = this.addCateFormDate.cat_name;
-      let cat_id =
-        this.addCateFormDate.pidArr[this.addCateFormDate.pidArr.length - 1] ||
-        0;
-      let cat_level = this.addCateFormDate.length;
+       let cat_level = this.addCateFormDate.pidArr.length;
+      let cat_pid =
+        this.addCateFormDate.pidArr.pop() || 0
+
+     
 
       let res = await this.$http({
         url: "categories",
-        methos: "post",
+        method: "post",
         data: {
           cat_name,
-          cat_id,
+          cat_pid,
           cat_level
         }
       });
+      console.log(res);
       if (res.data.meta.status == 201) {
         this.$message({
           type: "success",
@@ -118,6 +120,8 @@ export default {
           duration: 1000
         });
         this.addCateShow = false;
+        // this.categoriesList.push(res.data.data.)
+        this.$refs.addCateForm.resetFields();
         this.getCategoriesList();
       }
     },

@@ -28,6 +28,14 @@ axios.interceptors.request.use(config => {
   return config
 })
 
+
+axios.interceptors.response.use(response => {
+
+if(response.data.meta.status === 401){
+  router.push("/login")
+}
+  return response
+})
 //注册一个导航守卫
 router.beforeEach((to, from, next) => {
   if (to.path === "/login") {

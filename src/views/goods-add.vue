@@ -172,3 +172,9 @@ export default {
   background-color: #fff;
 }
 </style>
+<style>
+.ql-editor {
+  height: 200px;
+}
+</style>
+
